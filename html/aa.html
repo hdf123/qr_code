@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>识别二维码</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<style type="text/css">
+			body{margin: 0;}
+			.box h3{
+				font-weight: 300;
+				margin: 0;
+				font-size: 20px;
+				height: 60px;
+				line-height: 60px;
+				color: #000;
+			}
+			.url-box{
+				width:100%;
+				height: 30px;
+				line-height: 30px;
+				font-size: 14px;
+				border:1px solid red;
+			}
+			#file{
+				position: absolute;
+				width: 120px;
+				height: 120px;
+				opacity: 0;
+				top: 0;
+				left: 0;
+				overflow: hidden;
+				z-index: 10;
+			}
+			img{
+				width:100%;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="box" id="analytic" style="position: relative;">
+			<h3>长按二维码解析</h3>
+			<p class="url-box" id="urlBox"></p>
+			<img id="showImg" src="../img/a1.jpg"/>
+		</div>
+		
+		
+		<script src="jquery-1.11.3.js"></script>
+		<script src="llqrcode.js" type="text/javascript" charset="utf-8"></script>
+		<script src="analyticCode.js" type="text/javascript" charset="utf-8"></script>
+		<script type="text/javascript">
+			//扩展移动端长按事件
+			$.fn.longPress = function (fn) {
+			　　let timer = null;
+			　　let $this = this;
+			　　for (let i = 0; i < $this.length; i++) {
+				
+				　　$this[i].addEventListener('touchstart', function (event) {
+				　　		timer = setTimeout(fn, 600);
+				　　}, false);
+				
+				　　$this[i].addEventListener('touchend', function (event) {
+				　　		clearTimeout(timer);
+				　　}, false);
+			　　}
+			}
+			//阻止触发默认事件
+			//window.ontouchstart = function (e) { e.preventDefault(); };
+			//仅对当前元素进行阻止触发默认事件
+			document.getElementById('showImg').ontouchstart = function (e) { e.preventDefault(); };
+			
+			function alertChange(param){
+				if(param === 1){
+					getUrl(document.getElementById('showImg'),'img-url');
+				}else if(param === 2){
+					analyticCode.getUrl('img-url',document.getElementById('showImg'),function(url){alert(url);});
+				}else if(param === 3){
+					analyticCode.getUrl('img-url',document.getElementById('showImg'),function(url){window.location.href = url;});
+				}else if(param === 4){
+					analyticCode.getUrl('img-url',document.getElementById('showImg'),function(url){window.open(url);});
+				}else{
+					return;
+				}
+				$('#addDiv').remove();
+			}
+			
+			$('#showImg').longPress(function(){
+				let str = '<div id="addDiv" style="position:absolute;top:110px;left:50px;z-index:10;background:#000;color:#fff;font-size:16px;text-align:center;width:180px;border-radius:5px;">'+
+				'<p style="border-bottom:1px solid #fff;margin:0;height:50px;line-height:50px;" onclick="alertChange(1)">识别二维码</p>'+
+				'<p style="border-bottom:1px solid #fff;margin:0;height:50px;line-height:50px;" onclick="alertChange(2)">弹出地址</p>'+
+				'<p style="border-bottom:1px solid #fff;margin:0;height:50px;line-height:50px;" onclick="alertChange(3)">当前窗口打开地址</p>'+
+				'<p onclick="alertChange(4)">新窗口打开地址</p>'+
+				'</div>';
+				$('#analytic').append(str);
+			});
+			function getUrl(e,param){
+				analyticCode.getUrl(param,e,function(url1,url2){
+					console.log(url1);
+					$(".url-box").html(url1);
+					location.href=url1;
+//					e.nextElementSibling.innerHTML = url1;
+//					e.previousElementSibling.src = url2;
+				});
+			}
+		</script>
+	</body>
+</html>
